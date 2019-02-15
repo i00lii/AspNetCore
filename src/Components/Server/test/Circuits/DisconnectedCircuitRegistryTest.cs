@@ -13,13 +13,13 @@ namespace Microsoft.AspNetCore.Components.Server.Circuits
         public void AddInactiveCircuit_AddsCacheEntry()
         {
             // Arrange
-            var registry = new DisconnectedCircuitRegistry(
+            var registry = new CircuitRegistry(
                 Options.Create(new ComponentsServerOptions()),
-                NullLogger<DisconnectedCircuitRegistry>.Instance);
+                NullLogger<CircuitRegistry>.Instance);
             var circuitHost = TestCircuitHost.Create();
 
             // Act
-            registry.AddInactiveCircuit(circuitHost);
+            registry.Register(circuitHost);
 
             // Assert
             Assert.Equal(1, registry.MemoryCache.Count);

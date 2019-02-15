@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components.Server.Circuits;
 using Microsoft.AspNetCore.Components.Services;
@@ -19,7 +20,7 @@ namespace Microsoft.AspNetCore.Components.Server
     {
         private static readonly object CircuitKey = new object();
         private readonly CircuitFactory _circuitFactory;
-        private readonly DisconnectedCircuitRegistry _circuitRegistry;
+        private readonly CircuitRegistry _circuitRegistry;
         private readonly ILogger _logger;
 
         /// <summary>
@@ -29,7 +30,7 @@ namespace Microsoft.AspNetCore.Components.Server
         public ComponentsHub(IServiceProvider services, ILogger<ComponentsHub> logger)
         {
             _circuitFactory = services.GetRequiredService<CircuitFactory>();
-            _circuitRegistry = services.GetRequiredService<DisconnectedCircuitRegistry>();
+            _circuitRegistry = services.GetRequiredService<CircuitRegistry>();
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
@@ -59,7 +60,7 @@ namespace Microsoft.AspNetCore.Components.Server
             }
 
             CircuitHost = null;
-            _circuitRegistry.AddInactiveCircuit(circuitHost);
+            _circuitRegistry.Register(circuitHost);
             return circuitHost.OnConnectionDownAsync();
         }
 
@@ -87,7 +88,7 @@ namespace Microsoft.AspNetCore.Components.Server
         /// </summary>
         public async Task<bool> ConnectCircuit(string circuitId)
         {
-            if (!_circuitRegistry.TryGetInactiveCircuit(circuitId, out var circuitHost))
+            if (!_circuitRegistry.TryGetCircuit(circuitId, out var circuitHost))
             {
                 return false;
             }
