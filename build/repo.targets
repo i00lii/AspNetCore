@@ -71,7 +71,8 @@
         <NormalizedPath>$([System.String]::new('%(ProjectFileRelativePath)').Replace('/','\'))</NormalizedPath>
       </_ProjectReferenceProvider>
 
-      <_ProjectReferenceProviderWithRefAssembly>
+      <_ProjectReferenceProviderWithRefAssembly Include="@(_ProjectReferenceProvider->HasMetadata(''))">
+        <NormalizedPath>$([System.String]::new('%(ProjectFileRelativePath)').Replace('/','\'))</NormalizedPath>
       </_ProjectReferenceProviderWithRefAssembly>
 
       <_ProjectReferenceProvider Remove="@(_ProjectReferenceProviderWithRefAssembly)" />
@@ -95,6 +96,8 @@
                       File="$(ProjectListFile)" Lines="$([MSBuild]::Escape($(ProjectListContent)))" Overwrite="true" />
     <Exec Condition="'$(OS)' != 'Windows_NT'"
           Command="echo '$(ProjectListContent.Replace('\t','\\t'))' > $(ProjectListFile)" />
+
+    <PropertyGroup>
       <SharedFxDepList>$(MSBuildThisFileDirectory)..\eng\SharedFramework.Local.props</SharedFxDepList>
       <SharedFxDepListContent>
       <![CDATA[
