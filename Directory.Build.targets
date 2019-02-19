@@ -18,7 +18,8 @@
   <PropertyGroup Condition=" '$(MSBuildProjectExtension)' == '.csproj' ">
     <PackageId Condition=" '$(PackageId)' == '' ">$(AssemblyName)</PackageId>
     <IsPackable Condition="'$(IsPackable)' == '' AND ( '$(IsTestProject)' == 'true' OR '$(IsTestAssetProject)' == 'true' OR '$(IsBenchmarkProject)' == 'true' OR '$(IsSampleProject)' == 'true' ) ">false</IsPackable>
-    <HasReferenceAssembly Condition="'$(IsPackable)' == 'false' OR '$(IsShipping)' == 'false' OR '$(IsAnalyzersProject)' == 'true' OR '$(IsSpecificationTestProject)' == 'true' OR '$(IsTooltProject)' == 'true'">false</HasReferenceAssembly>
+    <HasReferenceAssembly Condition="'$(IsPackable)' == 'false' OR '$(IsShipping)' == 'false'">false</HasReferenceAssembly>
+    <HasReferenceAssembly Condition="'$(IsAnalyzersProject)' == 'true' OR '$(IsSpecificationTestProject)' == 'true' OR '$(IsToolProject)' == 'true'">false</HasReferenceAssembly>
   </PropertyGroup>
 
   <Import Project="eng\Baseline.Designer.props" />
