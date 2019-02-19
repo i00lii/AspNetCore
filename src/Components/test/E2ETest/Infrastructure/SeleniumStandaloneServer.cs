@@ -108,13 +108,15 @@ namespace Microsoft.AspNetCore.Components.E2ETest.Infrastructure
 
                     }
                     await Task.Delay(1000);
-
                 }
             });
 
             try
             {
-                waitForStart.TimeoutAfter(Timeout).Wait();
+                // Wait in intervals instead of indefinitely to prevent thread starvation.
+                while (!waitForStart.TimeoutAfter(Timeout).Wait(1000))
+                {
+                }
             }
             catch (Exception ex)
             {

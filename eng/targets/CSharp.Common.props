@@ -3,6 +3,21 @@
   <PropertyGroup>
     <LangVersion>7.3</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)..\AspNetCore.snk</AssemblyOriginatorKeyFile>
+    <SignAssembly>true</SignAssembly>
+
+     <!-- Instructs the compiler to use SHA256 instead of SHA1 when adding file hashes to PDBs. -->
+    <ChecksumAlgorithm>SHA256</ChecksumAlgorithm>
+
+    <!-- Enables Strict mode for Roslyn compiler -->
+    <Features>strict</Features>
+
+    <!-- Disables targets in Internal.AspNetCore.Sdk which are obsolete. -->
+    <GenerateSourceLinkFile>false</GenerateSourceLinkFile>
+    <GenerateRepositoryCommitUrlInDescription>false</GenerateRepositoryCommitUrlInDescription>
+    <GenerateCommitHashAttribute>false</GenerateCommitHashAttribute>
+    <GenerateInternalAspNetCoreAttributes>false</GenerateInternalAspNetCoreAttributes>
+    <DisableDeterministicSourceRoot>true</DisableDeterministicSourceRoot>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,13 +29,14 @@
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="$(MicrosoftNETFrameworkReferenceAssembliesPackageVersion)" PrivateAssets="All" AllowExplicitReference="true" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(AddImplicitReferences)' != 'false' AND '$(IsTestProject)' == 'true' ">
+  <ItemGroup Condition=" '$(IsTestProject)' == 'true' ">
     <Reference Include="Microsoft.AspNetCore.Testing" />
     <Reference Include="Microsoft.NET.Test.Sdk" />
     <Reference Include="Moq" />
     <Reference Include="xunit" />
     <Reference Include="xunit.analyzers" />
     <Reference Include="xunit.runner.visualstudio" />
+    <Reference Include="xunit.runner.console" Condition=" '$(TargetFrameworkIdentifier)' == '.NETFramework' AND '$(IsHelixJob)' == 'true' " />
   </ItemGroup>
 
 </Project>

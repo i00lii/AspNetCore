@@ -1,6 +1,4 @@
 <Project>
-  <Import Project="SharedFrameworkOnly.props" />
-
   <PropertyGroup>
     <TargetRuntimeIdentifier Condition="'$(TargetRuntimeIdentifier)' == ''">$(TargetOsName)-$(TargetArchitecture)</TargetRuntimeIdentifier>
   </PropertyGroup>
@@ -16,8 +14,9 @@
 
     <IsFinalBuild Condition="'$(IsFinalBuild)' == ''">false</IsFinalBuild>
 
-    <ArtifactsShippingPackagesDir>$(ArtifactsDir)packages\$(Configuration)\Shipping\</ArtifactsShippingPackagesDir>
-    <ArtifactsNonShippingPackagesDir>$(ArtifactsDir)packages\$(Configuration)\NonShipping\</ArtifactsNonShippingPackagesDir>
+    <ArtifactsPackagesDir>$(ArtifactsDir)packages\$(Configuration)\</ArtifactsPackagesDir>
+    <ArtifactsShippingPackagesDir>$(ArtifactsPackagesDir)Shipping\</ArtifactsShippingPackagesDir>
+    <ArtifactsNonShippingPackagesDir>$(ArtifactsPackagesDir)NonShipping\</ArtifactsNonShippingPackagesDir>
     <InstallersOutputPath>$(ArtifactsDir)installers\$(Configuration)\</InstallersOutputPath>
     <VisualStudioSetupOutputPath>$(ArtifactsDir)VSSetup\$(Configuration)\</VisualStudioSetupOutputPath>
 
@@ -143,6 +142,7 @@
         -->
         <DotNetProjects Include="
                           $(RepositoryRoot)src\Framework\ref\Microsoft.AspNetCore.App.Ref.csproj;
+                          $(RepositoryRoot)src\Framework\src\Microsoft.AspNetCore.App.Runtime.csproj;
                           $(RepositoryRoot)src\DefaultBuilder\**\*.*proj;
                           $(RepositoryRoot)src\Features\JsonPatch\**\*.*proj;
                           $(RepositoryRoot)src\DataProtection\**\*.*proj;
@@ -180,6 +180,8 @@
   </Choose>
 
   <Import Project="..\eng\Versions.props" />
+  <Import Project="..\eng\SharedFramework.Local.props" />
+  <Import Project="..\eng\SharedFramework.External.props" />
   <Import Project="runtimes.props" />
   <Import Project="CodeSign.props" />
 </Project>

@@ -28,7 +28,7 @@ namespace signalr
 
     void connection::set_message_received(const message_received_handler& message_received_callback)
     {
-        m_pImpl->set_message_received_string(message_received_callback);
+        m_pImpl->set_message_received(message_received_callback);
     }
 
     void connection::set_disconnected(const std::function<void()>& disconnected_callback)
@@ -46,7 +46,7 @@ namespace signalr
         return m_pImpl->stop();
     }
 
-    connection_state connection::get_connection_state() const
+    connection_state connection::get_connection_state() const noexcept
     {
         return m_pImpl->get_connection_state();
     }

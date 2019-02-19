@@ -139,8 +139,12 @@ This targets file should only be imported by .shfxproj files.
       <AllowExplicitVersion>true</AllowExplicitVersion>
     </PackageReference>
 
-    <!-- Note: do not add _TransitiveExternalDependency to this list. This is intentionally not listed as a direct package reference. -->
-    <PackageReference Include="@(Dependency);@(ExternalDependency)">
+    <!-- Add version metadata. These are expected to match the metapackage version. -->
+    <AspNetCoreAppReferenceAndPackage Update="@(AspNetCoreAppReferenceAndPackage)" Version="$(SharedFxVersion)" />
+    <AspNetCoreAppReference Update="@(AspNetCoreAppReference)" Version="$(SharedFxVersion)" />
+
+    <!-- Note: do not add _TransitiveExternalAspNetCoreAppReference to this list. This is intentionally not listed as a direct package reference. -->
+    <PackageReference Include="@(AspNetCoreAppReference);@(AspNetCoreAppReferenceAndPackage);@(ExternalAspNetCoreAppReference)">
       <IncludeAssets>Runtime;Native</IncludeAssets>
       <Publish>true</Publish>
     </PackageReference>
@@ -170,9 +174,9 @@ This targets file should only be imported by .shfxproj files.
   </Target>
 
   <!-- Generates the .version file in the shared framework -->
-  <Target Name="GenerateSharedFxVersionsFile">
+  <Target Name="GenerateSharedFxVersionsFile" DependsOnTargets="InitializeSourceControlInformation">
     <ItemGroup>
-      <VersionLines Include="$(RepositoryCommit)" />
+      <VersionLines Include="$(SourceRevisionId)" />
       <VersionLines Include="$(PackageVersion)" />
     </ItemGroup>
 
@@ -365,7 +369,7 @@ This targets file should only be imported by .shfxproj files.
         projectUrl=$(PackageProjectUrl);
         iconUrl=$(PackageIconUrl);
         repositoryUrl=$(RepositoryUrl);
-        repositoryCommit=$(RepositoryCommit);
+        repositoryCommit=$(SourceRevisionId);
         copyright=$(Copyright);
         targetFramework=$(TargetFramework);
         symbolsAssets=$([MSBuild]::NormalizeDirectory($(SymbolsOutputPath)));
