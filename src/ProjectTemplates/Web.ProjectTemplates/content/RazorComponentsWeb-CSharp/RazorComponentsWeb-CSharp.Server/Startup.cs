@@ -5,6 +5,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+#if (RequiresHttps)
+using Microsoft.AspNetCore.HttpsPolicy;
+#endif
 using Microsoft.Extensions.DependencyInjection;
 
 namespace RazorComponentsWeb_CSharp.Server
@@ -25,7 +28,17 @@ namespace RazorComponentsWeb_CSharp.Server
             {
                 app.UseDeveloperExceptionPage();
             }
+#if (RequiresHttps)
+            else
+            {
+                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+                app.UseHsts();
+            }
+#endif
 
+#if (RequiresHttps)
+            app.UseHttpsRedirection();
+#endif
             app.UseStaticFiles();
             app.UseRazorComponents<App.Startup>();
         }
