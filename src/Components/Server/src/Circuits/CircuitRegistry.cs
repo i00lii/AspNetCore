@@ -5,6 +5,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -16,8 +17,6 @@ namespace Microsoft.AspNetCore.Components.Server.Circuits
         private readonly ComponentsServerOptions _options;
         private readonly ILogger _logger;
         private readonly PostEvictionCallbackRegistration _postEvictionCallback;
-        private readonly ConcurrentDictionary<string, CircuitHost> _activeCircuits;
-        private readonly MemoryCache _inactiveCircuits;
 
         public CircuitRegistry(
             IOptions<ComponentsServerOptions> options,
@@ -26,9 +25,9 @@ namespace Microsoft.AspNetCore.Components.Server.Circuits
             _options = options.Value;
             _logger = logger;
 
-            _activeCircuits = new ConcurrentDictionary<string, CircuitHost>(StringComparer.Ordinal);
+            ActiveCircuits = new ConcurrentDictionary<string, CircuitHost>(StringComparer.Ordinal);
 
-            _inactiveCircuits = new MemoryCache(new MemoryCacheOptions
+            InactiveCircuits = new MemoryCache(new MemoryCacheOptions
             {
                 SizeLimit = _options.MaxRetainedDisconnectedCircuits,
             });
@@ -39,18 +38,34 @@ namespace Microsoft.AspNetCore.Components.Server.Circuits
             };
         }
 
+        internal ConcurrentDictionary<string, CircuitHost> ActiveCircuits { get; }
+
+        internal MemoryCache InactiveCircuits { get; }
+
         public void Register(CircuitHost circuitHost)
         {
-            _activeCircuits.TryAdd(circuitHost.CircuitId, circuitHost);
+            ActiveCircuits.TryAdd(circuitHost.CircuitId, circuitHost);
         }
 
-        public void MarkInactive(CircuitHost circuitHost)
+        public void Deactivate(CircuitHost circuitHost, string connectionId)
         {
-            if (!_activeCircuits.TryRemove(circuitHost.CircuitId, out circuitHost))
+            if (!ActiveCircuits.TryGetValue(circuitHost.CircuitId, out circuitHost))
             {
-                throw new InvalidOperationException($"Circuit with identifier {circuitHost.CircuitId} is not registered.");
+                // The circuit might already have been marked as inactive.
+                return;
             }
 
+            if (!string.Equals(circuitHost.CircuitClient.ConnectionId, connectionId, StringComparison.Ordinal))
+            {
+                // The circuit is associated with a different connection. One way this could happen is when
+                // the client reconnects with a new connection before the OnDisconnect for the older
+                // connection is executed. Do nothing
+                return;
+            }
+
+            ActiveCircuits.TryRemove(circuitHost.CircuitId, out circuitHost);
+
+            circuitHost.CircuitClient.IsConnected = false;
             var entryOptions = new MemoryCacheEntryOptions
             {
                 AbsoluteExpiration = DateTimeOffset.UtcNow.Add(_options.DisconnectedCircuitRetentionPeriod),
@@ -58,21 +73,30 @@ namespace Microsoft.AspNetCore.Components.Server.Circuits
                 PostEvictionCallbacks = { _postEvictionCallback },
             };
 
-            MemoryCache.Set(circuitHost.CircuitId, circuitHost, entryOptions);
-
+            InactiveCircuits.Set(circuitHost.CircuitId, circuitHost, entryOptions);
         }
 
-        public bool TryGetCircuit(string circuitId, out CircuitHost host)
+        public bool TryActivate(string circuitId, IClientProxy clientProxy, string connectionId, out CircuitHost host)
         {
-            if (_activeCircuits.TryGetValue(circuitId, out host))
+            if (ActiveCircuits.TryGetValue(circuitId, out host))
             {
+                if (!string.Equals(host.CircuitClient.ConnectionId, connectionId, StringComparison.Ordinal))
+                {
+                    // The host is still active i.e. the server hasn't detected the client disconnect.
+                    // However the client reconnected establishing a new connection.
+                    host.CircuitClient.Transfer(clientProxy, connectionId);
+                }
+
                 return true;
             }
 
-            if (_inactiveCircuits.TryGetValue(circuitId, out host))
+            if (InactiveCircuits.TryGetValue(circuitId, out host))
             {
-                _activeCircuits.TryAdd(circuitId, host);
-                _inactiveCircuits.Remove(circuitId);
+                ActiveCircuits.TryAdd(circuitId, host);
+                InactiveCircuits.Remove(circuitId);
+
+                // Inactive connections always require transfering the connection
+                host.CircuitClient.Transfer(clientProxy, connectionId);
 
                 return true;
             }

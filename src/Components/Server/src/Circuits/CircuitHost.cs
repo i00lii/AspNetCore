@@ -49,19 +49,21 @@ namespace Microsoft.AspNetCore.Components.Server.Circuits
 
         public CircuitHost(
             IServiceScope scope,
-            DelegatingClientProxy client,
+            CircuitClientProxy client,
             RendererRegistry rendererRegistry,
             RemoteRenderer renderer,
+            RemoteJSRuntime jsRuntime,
+            RemoteUriHelper remoteUriHelper,
             Action<IComponentsApplicationBuilder> configure,
-            IJSRuntime jsRuntime,
             CircuitHandler[] circuitHandlers)
         {
             _scope = scope ?? throw new ArgumentNullException(nameof(scope));
-            Client = client ?? throw new ArgumentNullException(nameof(client));
+            CircuitClient = client ?? throw new ArgumentNullException(nameof(client));
             RendererRegistry = rendererRegistry ?? throw new ArgumentNullException(nameof(rendererRegistry));
             Renderer = renderer ?? throw new ArgumentNullException(nameof(renderer));
-            _configure = configure ?? throw new ArgumentNullException(nameof(configure));
+            RemoteUriHelper = remoteUriHelper ?? throw new ArgumentNullException(nameof(remoteUriHelper));
             JSRuntime = jsRuntime ?? throw new ArgumentNullException(nameof(jsRuntime));
+            _configure = configure ?? throw new ArgumentNullException(nameof(configure));
 
             Services = scope.ServiceProvider;
 
@@ -76,13 +78,15 @@ namespace Microsoft.AspNetCore.Components.Server.Circuits
 
         public Circuit Circuit { get; }
 
-        public DelegatingClientProxy Client { get; }
+        public CircuitClientProxy CircuitClient { get; set; }
 
-        public IJSRuntime JSRuntime { get; }
+        public RemoteJSRuntime JSRuntime { get; }
 
         public RemoteRenderer Renderer { get; }
 
         public RendererRegistry RendererRegistry { get; }
+
+        public RemoteUriHelper RemoteUriHelper { get; }
 
         public IServiceProvider Services { get; }
 

@@ -101,7 +101,9 @@ namespace Microsoft.Extensions.DependencyInjection
             services.TryAddScoped(s => s.GetRequiredService<ICircuitAccessor>().Circuit);
             services.TryAddScoped<IJSRuntimeAccessor, DefaultJSRuntimeAccessor>();
             services.TryAddScoped(s => s.GetRequiredService<IJSRuntimeAccessor>().JSRuntime);
-            services.TryAddScoped<IUriHelper, RemoteUriHelper>();
+            services.TryAddScoped<UriHelperAccessor>();
+            services.TryAddScoped<IUriHelper>(s => s.GetRequiredService<UriHelperAccessor>().UriHelper);
+
             services.TryAddSingleton<CircuitRegistry>();
 
             // We've discussed with the SignalR team and believe it's OK to have repeated

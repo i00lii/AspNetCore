@@ -9,22 +9,22 @@ namespace Microsoft.AspNetCore.Components.Server.Circuits
 {
     public class DisconnectedCircuitRegistryTest
     {
-        [Fact]
-        public void AddInactiveCircuit_AddsCacheEntry()
-        {
-            // Arrange
-            var registry = new CircuitRegistry(
-                Options.Create(new ComponentsServerOptions()),
-                NullLogger<CircuitRegistry>.Instance);
-            var circuitHost = TestCircuitHost.Create();
+        //[Fact]
+        //public void AddInactiveCircuit_AddsCacheEntry()
+        //{
+        //    // Arrange
+        //    var registry = new CircuitRegistry(
+        //        Options.Create(new ComponentsServerOptions()),
+        //        NullLogger<CircuitRegistry>.Instance);
+        //    var circuitHost = TestCircuitHost.Create();
 
-            // Act
-            registry.Register(circuitHost);
+        //    // Act
+        //    registry.Register(circuitHost);
 
-            // Assert
-            Assert.Equal(1, registry.MemoryCache.Count);
-            Assert.True(registry.MemoryCache.TryGetValue(circuitHost.CircuitId, out var value));
-            Assert.Same(circuitHost, value);
-        }
+        //    // Assert
+        //    Assert.Equal(1, registry.MemoryCache.Count);
+        //    Assert.True(registry.MemoryCache.TryGetValue(circuitHost.CircuitId, out var value));
+        //    Assert.Same(circuitHost, value);
+        //}
     }
 }
