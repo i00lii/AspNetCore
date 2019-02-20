@@ -142,6 +142,23 @@ namespace Microsoft.AspNetCore.Components
         /// <param name="callback"></param>
         /// <returns></returns>
         [EditorBrowsable(EditorBrowsableState.Never)]
+        public EventCallback<T> Create<T>(object receiver, EventCallback callback)
+        {
+            if (receiver == null)
+            {
+                throw new ArgumentNullException(nameof(receiver));
+            }
+
+            return new EventCallback<T>(callback.Receiver, callback.Delegate);
+        }
+
+        /// <summary>
+        /// Returns the provided <paramref name="callback"/>. For internal framework use only.
+        /// </summary>
+        /// <param name="receiver"></param>
+        /// <param name="callback"></param>
+        /// <returns></returns>
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public EventCallback<T> Create<T>(object receiver, EventCallback<T> callback)
         {
             if (receiver == null)

@@ -365,7 +365,7 @@ namespace Microsoft.AspNetCore.Blazor.Build.Test
             var renderer = new TestRenderer();
 
             // Assert
-            Action<UIEventArgs> setter = null;
+            EventCallback setter = default;
             var frames = GetRenderTree(renderer, component);
             Assert.Collection(frames,
                 frame => AssertFrame.Element(frame, "input", 3, 0),
@@ -373,11 +373,11 @@ namespace Microsoft.AspNetCore.Blazor.Build.Test
                 frame =>
                 {
                     AssertFrame.Attribute(frame, "onchange", 2);
-                    setter = Assert.IsType<Action<UIEventArgs>>(frame.AttributeValue);
+                    setter = Assert.IsType<EventCallback>(frame.AttributeValue);
                 });
 
             // Trigger the change event to show it updates the property
-            await renderer.Invoke(() => setter(new UIChangeEventArgs { Value = "Modified value", }));
+            await renderer.InvokeAsync(() => setter.InvokeAsync(new UIChangeEventArgs { Value = "Modified value", }));
             Assert.Equal("Modified value", myValueProperty.GetValue(component));
         }
 
@@ -395,7 +395,7 @@ namespace Microsoft.AspNetCore.Blazor.Build.Test
             var renderer = new TestRenderer();
 
             // Assert
-            Action<UIEventArgs> setter = null;
+            EventCallback setter = default;
             var frames = GetRenderTree(renderer, component);
             Assert.Collection(frames,
                 frame => AssertFrame.Element(frame, "textarea", 3, 0),
@@ -403,11 +403,11 @@ namespace Microsoft.AspNetCore.Blazor.Build.Test
                 frame =>
                 {
                     AssertFrame.Attribute(frame, "onchange", 2);
-                    setter = Assert.IsType<Action<UIEventArgs>>(frame.AttributeValue);
+                    setter = Assert.IsType<EventCallback>(frame.AttributeValue);
                 });
 
             // Trigger the change event to show it updates the property
-            await renderer.Invoke(() => setter(new UIChangeEventArgs() { Value = "Modified value", }));
+            await renderer.InvokeAsync(() => setter.InvokeAsync(new UIChangeEventArgs() { Value = "Modified value", }));
             Assert.Equal("Modified value", myValueProperty.GetValue(component));
         }
 
@@ -425,7 +425,7 @@ namespace Microsoft.AspNetCore.Blazor.Build.Test
             var renderer = new TestRenderer();
 
             // Assert
-            Action<UIEventArgs> setter = null;
+            EventCallback setter = default;
             var frames = GetRenderTree(renderer, component);
             Assert.Collection(frames,
                 frame => AssertFrame.Element(frame, "input", 3, 0),
@@ -433,12 +433,12 @@ namespace Microsoft.AspNetCore.Blazor.Build.Test
                 frame =>
                 {
                     AssertFrame.Attribute(frame, "onchange", 2);
-                    setter = Assert.IsType<Action<UIEventArgs>>(frame.AttributeValue);
+                    setter = Assert.IsType<EventCallback>(frame.AttributeValue);
                 });
 
             // Trigger the change event to show it updates the property
             var newDateValue = new DateTime(2018, 3, 5, 4, 5, 6);
-            await renderer.Invoke(() => setter(new UIChangeEventArgs() { Value = newDateValue.ToString(), }));
+            await renderer.InvokeAsync(() => setter.InvokeAsync(new UIChangeEventArgs() { Value = newDateValue.ToString(), }));
             Assert.Equal(newDateValue, myDateProperty.GetValue(component));
         }
 
@@ -457,7 +457,7 @@ namespace Microsoft.AspNetCore.Blazor.Build.Test
             var renderer = new TestRenderer();
 
             // Assert
-            Action<UIEventArgs> setter = null;
+            EventCallback setter = default;
             var frames = GetRenderTree(renderer, component);
             Assert.Collection(frames,
                 frame => AssertFrame.Element(frame, "input", 3, 0),
@@ -465,11 +465,11 @@ namespace Microsoft.AspNetCore.Blazor.Build.Test
                 frame =>
                 {
                     AssertFrame.Attribute(frame, "onchange", 2);
-                    setter = Assert.IsType<Action<UIEventArgs>>(frame.AttributeValue);
+                    setter = Assert.IsType<EventCallback>(frame.AttributeValue);
                 });
 
             // Trigger the change event to show it updates the property
-            await renderer.Invoke(() => setter(new UIChangeEventArgs() { Value = new DateTime(2018, 3, 5).ToString(testDateFormat), }));
+            await renderer.InvokeAsync(() => setter.InvokeAsync(new UIChangeEventArgs() { Value = new DateTime(2018, 3, 5).ToString(testDateFormat), }));
             Assert.Equal(new DateTime(2018, 3, 5), myDateProperty.GetValue(component));
         }
 
@@ -540,18 +540,22 @@ namespace Microsoft.AspNetCore.Blazor.Build.Test
             var frames = GetRenderTree(renderer, component);
 
             // Assert
-            Assert.Collection(frames,
+            Action<UIMouseEventArgs> func = default; // Since this is a method group, we don't need to create an EventCallback
+            Assert.Collection(
+                frames,
                 frame => AssertFrame.Element(frame, "button", 2, 0),
                 frame =>
                 {
                     AssertFrame.Attribute(frame, "onclick", 1);
 
-                    var func = Assert.IsType<Action<UIMouseEventArgs>>(frame.AttributeValue);
+                    func = Assert.IsType<Action<UIMouseEventArgs>>(frame.AttributeValue);
                     Assert.False((bool)clicked.GetValue(component));
 
-                    func(new UIMouseEventArgs());
-                    Assert.True((bool)clicked.GetValue(component));
+
                 });
+
+            func.Invoke(new UIMouseEventArgs());
+            Assert.True((bool)clicked.GetValue(component));
         }
 
         [Fact]
@@ -568,7 +572,7 @@ namespace Microsoft.AspNetCore.Blazor.Build.Test
             var renderer = new TestRenderer();
 
             // Assert
-            Action<UIEventArgs> setter = null;
+            EventCallback setter = default;
             var frames = GetRenderTree(renderer, component);
             Assert.Collection(frames,
                 frame => AssertFrame.Element(frame, "input", 3, 0),
@@ -576,11 +580,11 @@ namespace Microsoft.AspNetCore.Blazor.Build.Test
                 frame =>
                 {
                     AssertFrame.Attribute(frame, "onchange", 2);
-                    setter = Assert.IsType<Action<UIEventArgs>>(frame.AttributeValue);
+                    setter = Assert.IsType<EventCallback>(frame.AttributeValue);
                 });
 
             // Trigger the change event to show it updates the property
-            await renderer.Invoke(() => setter(new UIChangeEventArgs() { Value = false, }));
+            await renderer.InvokeAsync(() => setter.InvokeAsync(new UIChangeEventArgs() { Value = false, }));
             Assert.False((bool)myValueProperty.GetValue(component));
         }
 
@@ -599,7 +603,7 @@ namespace Microsoft.AspNetCore.Blazor.Build.Test
             var renderer = new TestRenderer();
 
             // Assert
-            Action<UIEventArgs> setter = null;
+            EventCallback setter = default;
             var frames = GetRenderTree(renderer, component);
             Assert.Collection(frames,
                 frame => AssertFrame.Element(frame, "input", 3, 0),
@@ -607,11 +611,11 @@ namespace Microsoft.AspNetCore.Blazor.Build.Test
                 frame =>
                 {
                     AssertFrame.Attribute(frame, "onchange", 2);
-                    setter = Assert.IsType<Action<UIEventArgs>>(frame.AttributeValue);
+                    setter = Assert.IsType<EventCallback>(frame.AttributeValue);
                 });
 
             // Trigger the change event to show it updates the property
-            await renderer.Invoke(() => setter(new UIChangeEventArgs() { Value = MyEnum.SecondValue.ToString(), }));
+            await renderer.InvokeAsync(() => setter.InvokeAsync(new UIChangeEventArgs() { Value = MyEnum.SecondValue.ToString(), }));
             Assert.Equal(MyEnum.SecondValue, (MyEnum)myValueProperty.GetValue(component));
         }
 
